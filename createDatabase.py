@@ -1,17 +1,21 @@
 import weaviate
-import os
 import weaviate.classes as wvc
-import requests
-import json
 import numpy as np
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 import warnings
+
+
 # Suppress specific warning
 warnings.filterwarnings("ignore", category=FutureWarning, message=".*resume_download.*")
 
+
+
+
+collection_name = "Products"
 CSV_PATH = "/home/amanm/GenAI-Repo/GenAI-SummerInternsip/Products.csv"
-MODEL_NAME = "all-MiniLM-L6-v2"
+MODEL_LIST = ["sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2", "paraphrase-MiniLM-L6-v2", "all-MiniLM-L6-v2"]
+MODEL_NAME = MODEL_LIST[2]
 
 
 # Setting the model
@@ -28,7 +32,6 @@ column_lists = {}
 # Iterate through each column in the DataFrame
 for column in df.columns:
     column_lists[column] = df[column].tolist()
-
 
 
 # Example Access
@@ -62,10 +65,10 @@ client = weaviate.connect_to_local()
 
 
 # Creating a fresh collection in weaviate Vector DB
-if client.collections.exists("Products"):
-    client.collections.delete("Products")
+if client.collections.exists(collection_name):
+    client.collections.delete(collection_name)
 products = client.collections.create(
-    "Products",
+    collection_name,
     vectorizer_config=wvc.config.Configure.Vectorizer.none()
 )
 
@@ -94,7 +97,7 @@ prod_objs = [
     for i in range(len(df))
 ]
 
-products = client.collections.get("Products")
+products = client.collections.get(collection_name)
 products.data.insert_many(prod_objs)
 
 client.close()
