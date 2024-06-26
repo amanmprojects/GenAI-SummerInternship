@@ -66,9 +66,9 @@ async def get_product_details(query: str = "General Products", top_n: int = 10, 
         ))
     return response
 
-@app.get("/images/{image_name}")
-async def get_image(image_name: str):
-    file_path = f"images/{image_name}"
+@app.get("/images/{image_path}")
+async def get_image(image_path: str):
+    file_path = f"{image_path}"
     return FileResponse(file_path)
 
 

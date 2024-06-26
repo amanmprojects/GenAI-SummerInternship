@@ -1,18 +1,19 @@
 from typing import List, Dict, Any
-from sentence_transformers import SentenceTransformer
-import weaviate
-import weaviate.classes as wvc
+from sentence_transformers import SentenceTransformer # type: ignore
+import weaviate # type: ignore
+import weaviate.classes as wvc # type: ignore
 import warnings
 from dotenv import load_dotenv
-from groq import Groq
+from groq import Groq # type: ignore
 import os
-from prompt_template import prompt1
+from prompt_template import message_to_product
 
 
 # Suppressing warning
 warnings.filterwarnings("ignore", category=FutureWarning, message=".*resume_download.*")
 
 load_dotenv()
+
 
 # Setting the model
 MODEL_LIST = ["sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2", "paraphrase-MiniLM-L6-v2", "all-MiniLM-L6-v2", "paraphrase-MiniLM-L12-v2"]
@@ -22,7 +23,7 @@ model = SentenceTransformer(MODEL_NAME)
 
 
 # init weaviate client
-client = weaviate.connect_to_local()
+
 
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
@@ -31,13 +32,14 @@ GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 class WeaviateQueryService:
     def __init__(self, collection:str):
         self.model = model
-        self.collection = client.collections.get(collection)
+        self.client = weaviate.connect_to_local()
+        self.collection = self.client.collections.get(collection)
         self.groqHandler = groqHandler(api_key=GROQ_API_KEY)
 
     def get_results(self, query: str, top_n: int,groq_llama_simplfy :  bool = True ,print_responses_name:bool = False) -> List[Dict[str, Any]]:
         
         if groq_llama_simplfy:
-            query_mod = self.groqHandler.query_transform(query=query)
+            query_mod = self.groqHandler.query_simplify(query=query)
         else: query_mod = query
     
 
@@ -63,28 +65,24 @@ class WeaviateQueryService:
 class groqHandler:
     def __init__(self, api_key) -> None:
         self.api_key = api_key
-        self.init()
-
-    def init(self):
-        self.groq_client = Groq(
-            api_key=self.api_key
-        )
+        self.GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+        self.groq_client = Groq(api_key=self.api_key)
     
-    def query_transform(self, query:str):
+    def query_simplify(self, query:str):
             response = self.groq_client.chat.completions.create(
                 messages=[
                     {
                         "role": "system",
-                        'content': prompt1
+                        'content': message_to_product
                     },
                     {
                         "role": "user",
                         "content": query,
                     },
                 ],
-                model="llama3-70b-8192",
+                model="llama3-8b-8192",
                 )
-            print("YElo", response.choices[0].message.content)
+            print(response.choices[0].message.content)
             return str(response.choices[0].message.content)
         
 
