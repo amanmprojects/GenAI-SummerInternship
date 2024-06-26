@@ -1,10 +1,10 @@
-from fastapi import FastAPI, UploadFile, File, Response, Query      
-from fastapi.responses import FileResponse, StreamingResponse, JSONResponse
+from fastapi import FastAPI, UploadFile, File, Response, Query # type: ignore      
+from fastapi.responses import FileResponse, StreamingResponse, JSONResponse # type: ignore
 from io import BytesIO   
 import os
 import time
 from services import WeaviateQueryService
-from pydantic import BaseModel
+from pydantic import BaseModel # type: ignore
 from typing import List
 print("All imports successfull")
 

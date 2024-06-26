@@ -6,7 +6,7 @@ import warnings
 from dotenv import load_dotenv
 from groq import Groq # type: ignore
 import os
-from prompt_template import message_to_product
+from prompt_template import *
 import argparse
 
 # Suppressing warning
@@ -89,7 +89,7 @@ class groqHandler:
                 messages=[
                     {
                         "role": "system",
-                        'content': message_to_product
+                        'content': message_to_product2
                     },
                     {
                         "role": "user",
