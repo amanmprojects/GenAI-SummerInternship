@@ -5,36 +5,46 @@ import pandas as pd
 from sentence_transformers import SentenceTransformer
 import warnings
 import sys
+import argparse
 
 
-script_name = sys.argv[0]
-args = sys.argv[1:]
+# script_name = sys.argv[0]
+# args = sys.argv[1:]
 
-model_index = int(args[0])
-collection_name = args[1]
-CSV_PATH = "/home/amanm/GenAI-Repo/GenAI-SummerInternsip/Cleaned_Products.csv"
-# print(len(args))
-# if len(args) < 2:
-#     collection_name = "Products"
-#     if len(args) < 1:
-#         model_index = 2
-#     else :
-#         print(args[0])
-#         model_index = args[0]
-# else :
-#     collection_name = args[1]
-#     model_index = args[0]
+# Handling arguments for python Scripts
+def main(arg1, arg2, arg3):
+    print(f'Model: {arg1}')
+    print(f'Weaviate Collection : {arg2}')
+    print(f'CSV Path : {arg3}')
+
+MODEL_DICT = {
+    'mini-6' : "all-MiniLM-L6-v2",
+    "mini-12" : 'all-MiniLM-L12-v2'
+}
+MODEL_LIST = ["sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2", "paraphrase-MiniLM-L6-v2", "all-MiniLM-L6-v2", "paraphrase-MiniLM-L12-v2"]
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Script for creating a weaviate Database from CSV")
+    parser.add_argument('--model', type=str, default='mini-12', help='Set the Vectorizer Model from the given : '.join(MODEL_DICT.keys()).join(MODEL_DICT.values()))
+    parser.add_argument('--col', type=str, default='Products', help='Set the Collection in weaviate Database')
+    parser.add_argument('--csv', type=str, default='datasets_csv/Products.csv', help='Set the path of CSV to vectorize and insert in DB')
+
+    args = parser.parse_args()
+    main(args.model, args.col, args.csv)
 
 
-# Suppress specific warning
+MODEL_NAME = MODEL_DICT[args.model]
+collection_name = args.col
+CSV_PATH = args.csv 
+
+
 warnings.filterwarnings("ignore", category=FutureWarning, message=".*resume_download.*")
 
 
 
 
 
-MODEL_LIST = ["sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2", "paraphrase-MiniLM-L6-v2", "all-MiniLM-L6-v2", "paraphrase-MiniLM-L12-v2"]
-MODEL_NAME = MODEL_LIST[model_index]
+# MODEL_LIST = ["sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2", "paraphrase-MiniLM-L6-v2", "all-MiniLM-L6-v2", "paraphrase-MiniLM-L12-v2"]
+# MODEL_NAME = MODEL_LIST[model_index]
 
 
 # Setting the model
@@ -64,7 +74,7 @@ for column in df.columns:
 # years = column_lists['year']
 # usages = column_lists['usage']
 # descriptions = column_lists['description']
-# averageRatings = column_lists['averageRating']
+# averageRatings = column_lists['averageRating']id
 # numberOfRatings = column_lists['numberOfRatings']
 # Prices = column_lists['Price']
 
@@ -99,6 +109,7 @@ products = client.collections.create(
 prod_objs = [
     wvc.data.DataObject(
         properties = {
+            'product_id': column_lists['id'][i],
             'productDisplayName' : column_lists['productDisplayName'][i],
             'masterCategory' : column_lists['masterCategory'][i],
             'subCategory' : column_lists['subCategory'][i],
@@ -110,7 +121,8 @@ prod_objs = [
             'description' : column_lists['description'][i],
             'averageRating' : column_lists['averageRating'][i],
             'numberOfRatings' : column_lists['numberOfRatings'][i],
-            'Price' : column_lists['Price'][i]
+            'Price' : column_lists['Price'][i],
+            'imagePath' : f"images/{column_lists['id'][i]}.jpg  "
         },
         vector = vectors[i].tolist()
     )
