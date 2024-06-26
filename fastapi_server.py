@@ -6,12 +6,11 @@ import time
 from services import WeaviateQueryService
 from pydantic import BaseModel
 from typing import List
-# from json import JsonRes
 print("All imports successfull")
 
 
 
-query_service = WeaviateQueryService("Products")
+wv_query_service = WeaviateQueryService("Products")
 
 
 
@@ -44,7 +43,7 @@ class ProductResponse(BaseModel):
 
 @app.post("/query", response_model=List[ProductResponse])
 async def get_product_details(query: str = "General Products", top_n: int = 10, groq_simplify: bool = True):
-    products = query_service.get_results(query=query, top_n=top_n, groq_llama_simplfy=groq_simplify,print_responses_name=True)
+    products = wv_query_service.get_results(query=query, top_n=top_n, groq_llama_simplfy=groq_simplify,print_responses_name=True)
     response = []
 
     for product in products:
@@ -66,9 +65,9 @@ async def get_product_details(query: str = "General Products", top_n: int = 10, 
         ))
     return response
 
-@app.get("/images/{image_path}")
-async def get_image(image_path: str):
-    file_path = f"{image_path}"
+@app.get("/images/{image_name}")
+async def get_image(image_name: str):
+    file_path = f"images/{image_name}.jpg"
     return FileResponse(file_path)
 
 

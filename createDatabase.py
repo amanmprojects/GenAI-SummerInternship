@@ -1,15 +1,17 @@
-import weaviate
-import weaviate.classes as wvc
-import numpy as np
-import pandas as pd
-from sentence_transformers import SentenceTransformer
+import weaviate # type: ignore
+import weaviate.classes as wvc # type: ignore
+# import numpy as np
+import pandas as pd # type: ignore
+from sentence_transformers import SentenceTransformer # type: ignore
 import warnings
-import sys
 import argparse
 
 
-# script_name = sys.argv[0]
-# args = sys.argv[1:]
+# Suppressing warning
+warnings.filterwarnings("ignore", category=FutureWarning, message=".*resume_download.*")
+
+
+
 
 # Handling arguments for python Scripts
 def main(arg1, arg2, arg3):
@@ -19,15 +21,16 @@ def main(arg1, arg2, arg3):
 
 MODEL_DICT = {
     'mini-6' : "all-MiniLM-L6-v2",
-    "mini-12" : 'all-MiniLM-L12-v2'
+    "mini-12" : 'all-MiniLM-L12-v2',
+    'paraphrase-6' : "paraphrase-MiniLM-L6-v2",
+    'paraphrase-12' : "paraphrase-MiniLM-L12-v2",
 }
-MODEL_LIST = ["sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2", "paraphrase-MiniLM-L6-v2", "all-MiniLM-L6-v2", "paraphrase-MiniLM-L12-v2"]
+# MODEL_LIST = ["sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2", "paraphrase-MiniLM-L6-v2", "all-MiniLM-L6-v2", "paraphrase-MiniLM-L12-v2"]
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Script for creating a weaviate Database from CSV")
-    parser.add_argument('--model', type=str, default='mini-12', help='Set the Vectorizer Model from the given : '.join(MODEL_DICT.keys()).join(MODEL_DICT.values()))
+    parser.add_argument('--model', type=str, default='paraphrase-6', help='Set the Vectorizer Model from the given : '.join(MODEL_DICT.keys()).join(MODEL_DICT.values()))
     parser.add_argument('--col', type=str, default='Products', help='Set the Collection in weaviate Database')
     parser.add_argument('--csv', type=str, default='datasets_csv/Products.csv', help='Set the path of CSV to vectorize and insert in DB')
-
     args = parser.parse_args()
     main(args.model, args.col, args.csv)
 
@@ -37,14 +40,7 @@ collection_name = args.col
 CSV_PATH = args.csv 
 
 
-warnings.filterwarnings("ignore", category=FutureWarning, message=".*resume_download.*")
 
-
-
-
-
-# MODEL_LIST = ["sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2", "paraphrase-MiniLM-L6-v2", "all-MiniLM-L6-v2", "paraphrase-MiniLM-L12-v2"]
-# MODEL_NAME = MODEL_LIST[model_index]
 
 
 # Setting the model
@@ -122,7 +118,7 @@ prod_objs = [
             'averageRating' : column_lists['averageRating'][i],
             'numberOfRatings' : column_lists['numberOfRatings'][i],
             'Price' : column_lists['Price'][i],
-            'imagePath' : f"images/{column_lists['id'][i]}.jpg  "
+            'imagePath' : f"images/{column_lists['id'][i]}.jpg"
         },
         vector = vectors[i].tolist()
     )
