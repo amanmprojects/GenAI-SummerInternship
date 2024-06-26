@@ -4,6 +4,26 @@ import numpy as np
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 import warnings
+import sys
+
+
+script_name = sys.argv[0]
+args = sys.argv[1:]
+
+model_index = int(args[0])
+collection_name = args[1]
+CSV_PATH = "/home/amanm/GenAI-Repo/GenAI-SummerInternsip/Cleaned_Products.csv"
+# print(len(args))
+# if len(args) < 2:
+#     collection_name = "Products"
+#     if len(args) < 1:
+#         model_index = 2
+#     else :
+#         print(args[0])
+#         model_index = args[0]
+# else :
+#     collection_name = args[1]
+#     model_index = args[0]
 
 
 # Suppress specific warning
@@ -12,10 +32,9 @@ warnings.filterwarnings("ignore", category=FutureWarning, message=".*resume_down
 
 
 
-collection_name = "Products"
-CSV_PATH = "/home/amanm/GenAI-Repo/GenAI-SummerInternsip/Products.csv"
-MODEL_LIST = ["sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2", "paraphrase-MiniLM-L6-v2", "all-MiniLM-L6-v2"]
-MODEL_NAME = MODEL_LIST[2]
+
+MODEL_LIST = ["sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2", "paraphrase-MiniLM-L6-v2", "all-MiniLM-L6-v2", "paraphrase-MiniLM-L12-v2"]
+MODEL_NAME = MODEL_LIST[model_index]
 
 
 # Setting the model
@@ -32,6 +51,7 @@ column_lists = {}
 # Iterate through each column in the DataFrame
 for column in df.columns:
     column_lists[column] = df[column].tolist()
+
 
 
 # Example Access
