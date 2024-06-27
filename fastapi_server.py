@@ -17,7 +17,10 @@ wv_query_service = WeaviateQueryService("Products")
 
 app = FastAPI()
 
-# print("All initializations complete")
+
+# Define QueryRequest model
+class QueryRequest(BaseModel):
+    query: str
 
 
 class ProductResponse(BaseModel):
@@ -42,7 +45,8 @@ class ProductResponse(BaseModel):
 
 
 @app.post("/query", response_model=List[ProductResponse])
-async def get_product_details(query: str = "General Products", top_n: int = 10, groq_simplify: bool = True):
+async def get_product_details(query_request: QueryRequest, top_n: int = 10, groq_simplify: bool = True):
+    query = query_request.query
     print(f" \n\n\n Got query : {query}\n\n\n")
     products = wv_query_service.get_results(query=query, top_n=top_n, groq_llama_simplfy=groq_simplify,print_responses_name=True)
     response = []
