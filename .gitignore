@@ -1,3 +1,6 @@
 __pycache__/
 images/
 .env
+
+# To ignore random files created by LibreOffice
+*.csv#
