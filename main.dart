@@ -31,11 +31,19 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     });
 
     final response = await http.post(
+<<<<<<< HEAD
       Uri.parse('http://localhost:8888/query'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: json.encode(<String, String>{
+=======
+      Uri.parse('http://your-fastapi-url/query'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+>>>>>>> 1c28f23552ae65c51670d18438a9c5b2e4023bb5
         'query': query,
       }),
     );
@@ -43,8 +51,12 @@ class _ProductSearchScreenState extends State<ProductSearchScreen> {
     if (response.statusCode == 200) {
       List<dynamic> productList = jsonDecode(response.body);
       setState(() {
+<<<<<<< HEAD
         _products =
             productList.map((product) => Product.fromJson(product)).toList();
+=======
+        _products = productList.map((product) => Product.fromJson(product)).toList();
+>>>>>>> 1c28f23552ae65c51670d18438a9c5b2e4023bb5
         _isLoading = false;
       });
     } else {
