@@ -1,334 +1,174 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
-import 'dart:async';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shimmer/shimmer.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: HomeScreen(),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: ProductSearchScreen(),
     );
   }
 }
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
-
+class ProductSearchScreen extends StatefulWidget {
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  _ProductSearchScreenState createState() => _ProductSearchScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  final TextEditingController _controller = TextEditingController();
-  String _response = '';
-  bool _isShimmerVisible = false;
-  bool _isLoadingData = false;
-  bool _showDropdown = false;
+class _ProductSearchScreenState extends State<ProductSearchScreen> {
+  TextEditingController _controller = TextEditingController();
+  List<Product> _products = [];
+  bool _isLoading = false;
 
-  final List<Map<String, dynamic>> _dataList = [
-    {
-      'image': 'https://m.media-amazon.com/images/I/71I-cik1CyL._AC_SY550_.jpg',
-      'title': 'Title 1',
-      'description': 'Description 1',
-      'prize': '₹100',
-      'rating': 3.25,
-      'numRatings': 100,
-    },
-    {
-      'image': 'https://m.media-amazon.com/images/I/61o9trA+GEL._AC_SX425_.jpg',
-      'title': 'Title 2',
-      'description': 'Description 2',
-      'prize': '₹200',
-      'rating': 4.2,
-      'numRatings': 80,
-    },
-    {
-      'image': 'https://m.media-amazon.com/images/I/61avoAvNiAL._AC_SY550_.jpg',
-      'title': 'Title 3',
-      'description': 'Description 3',
-      'prize': '₹150',
-      'rating': 4.8,
-      'numRatings': 120,
-    },
-    {
-      'image': 'https://via.placeholder.com/200',
-      'title': 'Title 4',
-      'description': 'Description 4',
-      'prize': '₹180',
-      'rating': 4.4,
-      'numRatings': 95,
-    },
-    {
-      'image': 'https://via.placeholder.com/200',
-      'title': 'Title 5',
-      'description': 'Description 5',
-      'prize': '₹250',
-      'rating': 4.7,
-      'numRatings': 110,
-    },
-    {
-      'image': 'https://via.placeholder.com/200',
-      'title': 'Title 6',
-      'description': 'Description 6',
-      'prize': '₹300',
-      'rating': 4.6,
-      'numRatings': 105,
-    },
-  ];
-
-  String _selectedSortOption = 'All';
-
-  Future<void> _sendRequest() async {
+  Future<void> _searchProducts(String query) async {
     setState(() {
-      _isShimmerVisible = true;
-      _isLoadingData = false;
-      _showDropdown = true;
+      _isLoading = true;
     });
-    Timer(const Duration(seconds: 2), () {
-      setState(() {
-        _isLoadingData = true;
-      });
-      _loadData();
-    });
-
 
     final response = await http.post(
-      Uri.parse('http://127.0.0.1:8000/process_query'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'query': _controller.text}),
+      Uri.parse('http://your-fastapi-url/query'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'query': query,
+      }),
     );
 
     if (response.statusCode == 200) {
-      final responseData = jsonDecode(response.body);
+      List<dynamic> productList = jsonDecode(response.body);
       setState(() {
-        _response = responseData['modified_query'];
+        _products = productList.map((product) => Product.fromJson(product)).toList();
+        _isLoading = false;
       });
     } else {
       setState(() {
-        _response = 'Error: ${response.reasonPhrase}';
+        _isLoading = false;
       });
+      throw Exception('Failed to load products');
     }
-  }
-
-  Future<void> _loadData() async {
-    await Future.delayed(const Duration(seconds: 20000000000));
-    setState(() {
-      _isShimmerVisible = false;
-    });
-  }
-
-  Widget _buildStarRating(double rating) {
-    List<Widget> stars = [];
-    int fullStars = rating.floor();
-    double fraction = rating - fullStars;
-    for (int i = 0; i < fullStars; i++) {
-      stars.add(const Icon(Icons.star, size: 16, color: Colors.amber));
-    }
-    if (fraction > 0) {
-      stars.add(const Icon(Icons.star_half, size: 16, color: Colors.amber));
-    }
-    for (int i = stars.length; i < 5; i++) {
-      stars.add(const Icon(Icons.star_border, size: 16, color: Colors.grey));
-    }
-    return Row(children: stars);
-  }
-
-  void _sortData(String sortType) {
-    setState(() {
-      _selectedSortOption = sortType;
-      switch (sortType) {
-        case 'Price Low to High':
-          _dataList.sort((a, b) => a['prize'].compareTo(b['prize']));
-          break;
-        case 'Price High to Low':
-          _dataList.sort((a, b) => b['prize'].compareTo(a['prize']));
-          break;
-        case 'Rating':
-          _dataList.sort((a, b) => b['rating'].compareTo(a['rating']));
-          break;
-        case 'All':
-          break;
-        default:
-          break;
-      }
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Cymbal Fashion')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              TextField(
-                controller: _controller,
-                decoration: InputDecoration(
-                  hintText: 'What can we help you find?',
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.search),
-                    onPressed: _sendRequest,
-                  ),
+      appBar: AppBar(
+        title: Text('Product Search'),
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: _controller,
+              decoration: InputDecoration(
+                hintText: 'Search for products...',
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.search),
+                  onPressed: () {
+                    _searchProducts(_controller.text);
+                  },
                 ),
               ),
-              const SizedBox(height: 20),
-              if (_response.isNotEmpty)
-                Text(
-                  _response,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              if (_showDropdown)
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: DropdownButton<String>(
-                    value: _selectedSortOption,
-                    onChanged: (String? newValue) {
-                      _sortData(newValue!);
-                    },
-                    items: <String>['All', 'Price Low to High', 'Price High to Low', 'Rating']
-                        .map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              _isShimmerVisible
-                  ? SizedBox(
-                      width: 400,
-                      height: 2000,
-                      child: ListView.builder(
-                        itemCount: _dataList.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: SizedBox(
-                              height: 300,
-                              width: 200,
-                              child: Card(
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: _isLoadingData
-                                          ? Image.network(
-                                              _dataList[index]['image'],
-                                              width: 200,
-                                              height: 300,
-                                              fit: BoxFit.cover,
-                                            )
-                                          : Shimmer.fromColors(
-                                              baseColor: Colors.grey[300]!,
-                                              highlightColor: Colors.grey[100]!,
-                                              child: Container(
-                                                width: 200,
-                                                height: 300,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                    ),
-                                    Expanded(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            _isLoadingData
-                                                ? Text(
-                                                    _dataList[index]['title'],
-                                                    style: const TextStyle(
-                                                      fontWeight: FontWeight.bold,
-                                                      fontSize: 20,
-                                                    ),
-                                                  )
-                                                : Shimmer.fromColors(
-                                                    baseColor: Colors.grey[300]!,
-                                                    highlightColor: Colors.grey[100]!,
-                                                    child: Container(
-                                                      height: 20,
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                            const SizedBox(height: 5),
-                                            _isLoadingData
-                                                ? Text(
-                                                    _dataList[index]['description'],
-                                                    style: const TextStyle(fontSize: 16),
-                                                  )
-                                                : Shimmer.fromColors(
-                                                    baseColor: Colors.grey[300]!,
-                                                    highlightColor: Colors.grey[100]!,
-                                                    child: Container(
-                                                      height: 20,
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                            const SizedBox(height: 5),
-                                            _isLoadingData
-                                                ? Row(
-                                                    children: [
-                                                      _buildStarRating(_dataList[index]['rating']),
-                                                      const SizedBox(width: 5),
-                                                      Text(
-                                                        '(${_dataList[index]['numRatings']})',
-                                                        style: const TextStyle(fontSize: 14),
-                                                      ),
-                                                    ],
-                                                  )
-                                                : Shimmer.fromColors(
-                                                    baseColor: Colors.grey[300]!,
-                                                    highlightColor: Colors.grey[100]!,
-                                                    child: Container(
-                                                      height: 20,
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                            _isLoadingData
-                                                ? Text(
-                                                    'Prize: ${_dataList[index]['prize']}',
-                                                    style: const TextStyle(
-                                                      fontSize: 18,
-                                                      fontStyle: FontStyle.italic,
-                                                      fontWeight: FontWeight.bold,
-                                                    ),
-                                                  )
-                                                : Shimmer.fromColors(
-                                                    baseColor: Colors.grey[300]!,
-                                                    highlightColor: Colors.grey[100]!,
-                                                    child: Container(
-                                                      height: 20,
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    )
-                  : Container(),
-            ],
+            ),
+          ),
+          Expanded(
+            child: _isLoading ? _buildShimmer() : _buildProductList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildShimmer() {
+    return ListView.builder(
+      itemCount: 10,
+      itemBuilder: (context, index) => Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: ListTile(
+          leading: CircleAvatar(),
+          title: Container(
+            width: double.infinity,
+            height: 10.0,
+            color: Colors.white,
+          ),
+          subtitle: Container(
+            width: double.infinity,
+            height: 10.0,
+            color: Colors.white,
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildProductList() {
+    return ListView.builder(
+      itemCount: _products.length,
+      itemBuilder: (context, index) {
+        final product = _products[index];
+        return ListTile(
+          leading: Image.network(product.imagePath),
+          title: Text(product.displayNames),
+          subtitle: Text(product.descriptions),
+        );
+      },
+    );
+  }
+}
+
+class Product {
+  final int id;
+  final String displayNames;
+  final String masterCategories;
+  final String subCategories;
+  final String articleTypes;
+  final String baseColours;
+  final String seasons;
+  final int years;
+  final String usages;
+  final String descriptions;
+  final double averageRatings;
+  final int numberOfRatings;
+  final String imagePath;
+
+  Product({
+    required this.id,
+    required this.displayNames,
+    required this.masterCategories,
+    required this.subCategories,
+    required this.articleTypes,
+    required this.baseColours,
+    required this.seasons,
+    required this.years,
+    required this.usages,
+    required this.descriptions,
+    required this.averageRatings,
+    required this.numberOfRatings,
+    required this.imagePath,
+  });
+
+  factory Product.fromJson(Map<String, dynamic> json) {
+    return Product(
+      id: json['id'],
+      displayNames: json['displayNames'],
+      masterCategories: json['masterCategories'],
+      subCategories: json['subCategories'],
+      articleTypes: json['articleTypes'],
+      baseColours: json['baseColours'],
+      seasons: json['seasons'],
+      years: json['years'],
+      usages: json['usages'],
+      descriptions: json['descriptions'],
+      averageRatings: json['averageRatings'].toDouble(),
+      numberOfRatings: json['numberOfRatings'],
+      imagePath: json['imagePath'],
     );
   }
 }
