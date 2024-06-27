@@ -71,7 +71,7 @@ class WeaviateQueryService:
 
         if print_responses_name:
             for response in responses.objects:
-                print(response)
+                print(response.properties['productDisplayName'])
 
         
         return responses.objects
@@ -89,7 +89,7 @@ class groqHandler:
                 messages=[
                     {
                         "role": "system",
-                        'content': message_to_product
+                        'content': message_to_product4
                     },
                     {
                         "role": "user",
