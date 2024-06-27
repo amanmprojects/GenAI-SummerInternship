@@ -22,7 +22,7 @@ MODEL_DICT = {
 }
 # Handling arguments for python Scripts
 
-MODEL_NAME = MODEL_DICT['paraphrase-6']
+MODEL_NAME = MODEL_DICT['mini-6']
 # def main(arg1):
 #     print(f'Model: {arg1}')
 #     MODEL_NAME = MODEL_DICT[args.model]
@@ -67,14 +67,14 @@ class WeaviateQueryService:
             near_vector=query_vector,
             limit=top_n,
             return_metadata=wvc.query.MetadataQuery(certainty=True)
-        ).objects
+        )
 
         if print_responses_name:
-            for response in responses:
-                print(response.properties['productDisplayName'])
+            for response in responses.objects:
+                print(response)
 
         
-        return responses
+        return responses.objects
     
 
 
@@ -89,14 +89,14 @@ class groqHandler:
                 messages=[
                     {
                         "role": "system",
-                        'content': message_to_product2
+                        'content': message_to_product
                     },
                     {
                         "role": "user",
                         "content": query,
                     },
                 ],
-                model="llama3-8b-8192",
+                model="llama3-70b-8192",
                 )
             print(response.choices[0].message.content)
             return str(response.choices[0].message.content)

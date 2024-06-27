@@ -43,6 +43,7 @@ class ProductResponse(BaseModel):
 
 @app.post("/query", response_model=List[ProductResponse])
 async def get_product_details(query: str = "General Products", top_n: int = 10, groq_simplify: bool = True):
+    print(f" \n\n\n Got query : {query}\n\n\n")
     products = wv_query_service.get_results(query=query, top_n=top_n, groq_llama_simplfy=groq_simplify,print_responses_name=True)
     response = []
 

@@ -28,7 +28,7 @@ MODEL_DICT = {
 # MODEL_LIST = ["sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2", "paraphrase-MiniLM-L6-v2", "all-MiniLM-L6-v2", "paraphrase-MiniLM-L12-v2"]
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Script for creating a weaviate Database from CSV")
-    parser.add_argument('--model', type=str, default='paraphrase-6', help='Set the Vectorizer Model from the given : '.join(MODEL_DICT.keys()).join(MODEL_DICT.values()))
+    parser.add_argument('--model', type=str, default='mini-6', help='Set the Vectorizer Model from the given : '.join(MODEL_DICT.keys()).join(MODEL_DICT.values()))
     parser.add_argument('--col', type=str, default='Products', help='Set the Collection in weaviate Database')
     parser.add_argument('--csv', type=str, default='datasets_csv/Products.csv', help='Set the path of CSV to vectorize and insert in DB')
     args = parser.parse_args()
