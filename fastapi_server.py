@@ -13,8 +13,6 @@ print("All imports successfull")
 wv_query_service = WeaviateQueryService("Products")
 
 
-
-
 app = FastAPI()
 
 
