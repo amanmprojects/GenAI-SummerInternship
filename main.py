@@ -7,6 +7,7 @@ from typing import List
 from dotenv import load_dotenv
 import search
 import prompt_templates
+
 load_dotenv()
 
 
@@ -32,11 +33,18 @@ app.add_middleware(
 
 class QueryRequest(BaseModel):
     query: str
+    top_n: int = 10
+    groq: bool = False
 
 
 import os
 from fastapi import UploadFile
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+if GROQ_API_KEY is None:
+    print("No GROQ_API_KEY found in environment variables")
+    exit(1)
+
+
 
 groqHandler = search.groqHandler(api_key=GROQ_API_KEY, template=prompt_templates.message_to_product6)
 wqs = search.WeaviateQueryService(collection="CleanedProducts", groqHandler=groqHandler, target_vector="name_master_sub_art_col_use_seas_gender")
@@ -46,18 +54,34 @@ image_search = search.ImageSearch(wqs = wqs)
 async def read_root():
     return '<h1> Welcome to the Semantic Search Engine </h1><br> <h2> Please use the <a href="http://localhost:8888/search/">/search/</a> endpoint to search for products </h2>'
 
-@app.post("/text_search/")
-async def search_item(query: QueryRequest, top_n: int = 10, groq_simplify: bool = True):
+
+
+@app.post("/text_search")
+async def search_item(query: QueryRequest, top_n: int = 10, groq_simplify: bool = False):
+
+    if not query.query:
+        return JSONResponse(status_code=400, content=jsonable_encoder({"error": "Query not found"}))
+    
+    limit = query.top_n
+    groq_simplify = query.groq
     query = query.query
-    limit = top_n
+    if not groq_simplify:
+        if len(query) < 40: 
+            groq_simplify = False
+        else:
+            groq_simplify = True
+
+
     print(f" \n\n\n Got query : {query}\n\n\n")
 
     # Perform search
     response = wqs.get_results(query=query, limit=limit, groq_llama_simplfy=groq_simplify, print_responses_name=True)
     return response
 
+
+
 @app.post("/image-search/")
-async def search_image(image: UploadFile = File(...), top_n: int = 10, groq_simplify: bool = True):
+async def search_image(image: UploadFile = File(...), top_n: int = 10):
     # Process the image
     image_data = await image.read()
     
@@ -66,6 +90,11 @@ async def search_image(image: UploadFile = File(...), top_n: int = 10, groq_simp
     return response
     # return response
 
+
+@app.get('/recommends')
+async def recommend_products():
+    response = wqs.get_recommends()
+    return response
 
 
 
