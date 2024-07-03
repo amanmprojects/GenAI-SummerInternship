@@ -1,6 +1,6 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from typing import List
@@ -34,7 +34,7 @@ app.add_middleware(
 class QueryRequest(BaseModel):
     query: str
     top_n: int = 10
-    groq: bool = False
+    groq: bool = True
 
 
 import os
@@ -46,8 +46,8 @@ if GROQ_API_KEY is None:
 
 
 
-groqHandler = search.groqHandler(api_key=GROQ_API_KEY, template=prompt_templates.message_to_product6)
-wqs = search.WeaviateQueryService(collection="CleanedProducts", groqHandler=groqHandler, target_vector="name_master_sub_art_col_use_seas_gender")
+groqHandler = search.groqHandler(api_key=GROQ_API_KEY, template=prompt_templates.words_to_product)
+wqs = search.WeaviateQueryService(collection="CleanedProducts", groqHandler=groqHandler, target_vector="name_master_sub_col")
 image_search = search.ImageSearch(wqs = wqs)
 
 @app.get("/")
@@ -57,7 +57,7 @@ async def read_root():
 
 
 @app.post("/text_search")
-async def search_item(query: QueryRequest, top_n: int = 10, groq_simplify: bool = False):
+async def search_item(query: QueryRequest, top_n: int = 10, groq_simplify: bool = True):
 
     if not query.query:
         return JSONResponse(status_code=400, content=jsonable_encoder({"error": "Query not found"}))
@@ -65,11 +65,11 @@ async def search_item(query: QueryRequest, top_n: int = 10, groq_simplify: bool 
     limit = query.top_n
     groq_simplify = query.groq
     query = query.query
-    if not groq_simplify:
-        if len(query) < 40: 
-            groq_simplify = False
-        else:
-            groq_simplify = True
+    # if not groq_simplify:
+    #     if len(query) < 40: 
+    #         groq_simplify = False
+    #     else:
+    #         groq_simplify = True
 
 
     print(f" \n\n\n Got query : {query}\n\n\n")
@@ -81,7 +81,7 @@ async def search_item(query: QueryRequest, top_n: int = 10, groq_simplify: bool 
 
 
 @app.post("/image-search/")
-async def search_image(image: UploadFile = File(...), top_n: int = 10):
+async def search_image(image: UploadFile = File(...), top_n: int = 30):
     # Process the image
     image_data = await image.read()
     
@@ -98,3 +98,7 @@ async def recommend_products():
 
 
 
+@app.get("/images/{image_name}")
+async def get_image(image_name: str):
+    file_path = f"images/{image_name}.jpg"
+    return FileResponse(file_path)

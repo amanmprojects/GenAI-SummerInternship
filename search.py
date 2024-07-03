@@ -83,7 +83,7 @@ class WeaviateQueryService:
 
         
 
-    def get_results(self, query: str, limit: int = 10, groq_llama_simplfy : bool = False, print_responses_name: bool = False) -> List[Dict[str, Any]]:
+    def get_results(self, query: str, limit: int = 30, groq_llama_simplfy : bool = True, print_responses_name: bool = False) -> List[Dict[str, Any]]:
         
         if groq_llama_simplfy and self.groqHandler:
             modified_query = self.groqHandler.query_to_products(query)
@@ -127,7 +127,7 @@ class ImageSearch:
         self.model=model
         self.preprocess=preprocess
         self.wqs = wqs
-        masterCat = ['Topwear', 'Bottomwear', 'Watches', 'Socks', 'Shoes', 'Belts', 'Flip Flops', 'Bags', 'Innerwear', 'Sandal',
+        masterCat = ['Topwear', 'Bottomwear', 'Watches', 'Socks', 'Shoes', 'Belts', 'Flip Flops', 'Bags', 'Sandal',
          'Shoe Accessories', 'Fragrance', 'Jewellery', 'Lips', 'Saree', 'Eyewear', 'Nails', 'Scarves', 'Dress',
          'Loungewear and Nightwear', 'Wallets', 'Apparel Set', 'Headwear', 'Mufflers', 'Skin Care', 'Makeup',
          'Free Gifts', 'Ties', 'Accessories', 'Skin', 'Beauty Accessories', 'Water Bottle', 'Eyes', 'Bath and Body',
@@ -136,7 +136,7 @@ class ImageSearch:
         subCat = ['Shirts', 'Jeans', 'Watches', 'Track Pants', 'Tshirts', 'Socks', 'Casual Shoes', 'Belts', 'Flip Flops',
          'Handbags', 'Tops', 'Bra', 'Sandals', 'Shoe Accessories', 'Sweatshirts', 'Deodorant', 'Formal Shoes',
          'Bracelet', 'Lipstick', 'Flats', 'Kurtas', 'Waistcoat', 'Sports Shoes', 'Shorts', 'Briefs', 'Sarees',
-         'Perfume and Body Mist', 'Heels', 'Sunglasses', 'Innerwear Vests', 'Pendant', 'Nail Polish', 'Laptop Bag',
+         'Perfume and Body Mist', 'Heels', 'Sunglasses', 'Pendant', 'Nail Polish', 'Laptop Bag',
          'Scarves', 'Rain Jacket', 'Dresses', 'Night suits', 'Skirts', 'Wallets', 'Blazers', 'Ring', 'Kurta Sets',
          'Clutches', 'Shrug', 'Backpacks', 'Caps', 'Trousers', 'Earrings', 'Camisoles', 'Boxers', 'Jewellery Set',
          'Dupatta', 'Capris', 'Lip Gloss', 'Bath Robe', 'Mufflers', 'Tunics', 'Jackets', 'Trunk', 'Lounge Pants',
@@ -147,7 +147,7 @@ class ImageSearch:
          'Accessory Gift Set', 'Beauty Accessory', 'Jumpsuit', 'Kajal and Eyeliner', 'Water Bottle', 'Suspenders',
          'Lip Liner', 'Robe', 'Salwar and Dupatta', 'Patiala', 'Stockings', 'Eyeshadow', 'Headband', 'Tights',
          'Nail Essentials', 'Churidar', 'Lounge Tshirts', 'Face Scrub and Exfoliator', 'Lounge Shorts', 'Gloves',
-         'Mask and Peel', 'Wristbands', 'Tablet Sleeve', 'Footballs', 'Stoles', 'Shapewear', 'Nehru Jackets',
+         'Mask and Peel', 'Wristbands', 'Tablet Sleeve', 'Footballs', 'Stoles', 'Nehru Jackets',
          'Salwar', 'Cufflinks', 'Jeggings', 'Hair Colour', 'Concealer', 'Rompers', 'Body Lotion', 'Sunscreen',
          'Booties', 'Waist Pouch', 'Hair Accessory', 'Rucksacks', 'Basketballs', 'Lehenga Choli', 'Clothing Set',
          'Mascara', 'Toner', 'Cushion Covers', 'Key chain', 'Makeup Remover', 'Lip Plumper', 'Umbrellas',
@@ -156,7 +156,7 @@ class ImageSearch:
          'Teal', 'Copper', 'Pink', 'Off White', 'Maroon', 'Red', 'Khaki', 'Orange', 'Coffee Brown', 'Yellow',
          'Charcoal', 'Gold', 'Steel', 'Tan', 'Multi', 'Magenta', 'Lavender', 'Sea Green', 'Cream', 'Peach', 'Olive',
          'Skin', 'Burgundy', 'Grey Melange', 'Rust', 'Rose', 'Lime Green', 'Mauve', 'Turquoise Blue', 'Metallic',
-         'Mustard', 'Taupe', 'Nude', 'Mushroom Brown', 'Unknown', 'Fluorescent Green']
+         'Mustard', 'Taupe', 'Nude', 'Mushroom Brown', 'Unknown', 'Fluorescent Green', "Women bra"]
         color = [f'Mostly {color_name}' for color_name in color_basic]
         usage = ['Casual', 'Ethnic', 'Formal', 'Sports', 'Unknown', 'Smart Casual', 'Travel', 'Party', 'Home']
         brand = ['Dior', 'Versace', 'Ugg', 'Puma', "Levi's", 'Nike', 'Dolce & Gabbana', 'Vans', 'Skechers', 
@@ -164,9 +164,9 @@ class ImageSearch:
          'Armani', 'Hugo Boss', 'Zara', 'Adidas', 'Oakley', 'Guess', 'Reebok', 'Ralph Lauren', 
          'Clarks', 'Crocs', 'Fossil', 'Burberry', 'ASICS', 'Bata', 'Valentino', 'Salomon', 
          'New Balance', 'Ray-Ban', 'Casio', 'Unknown']
-        gender = ['Men', 'Women', 'Unisex']
+        gender = ['Men', 'Women']
         # name_master_sub_art_col_use_seas_gender
-        self.lists = [masterCat, subCat, color,usage,brand,gender]
+        self.lists = [color, brand, subCat,gender]
 
     def get_results(self, image_data, top_n: int = 10):
 
@@ -193,15 +193,10 @@ class ImageSearch:
         
         final_description = " ".join(best_descriptions)
         print(f"Final description: {final_description}")
+        groqqed_final_description = self.wqs.groqHandler.query_to_products(final_description)
 
         # Perform search
-        response = self.wqs.get_results(query=final_description, limit=top_n, groq_llama_simplfy=False, print_responses_name=True)
+        response = self.wqs.get_results(query=groqqed_final_description, limit=top_n, groq_llama_simplfy=False, print_responses_name=True)
 
 
         return response
-
-
-
-
-    
-
