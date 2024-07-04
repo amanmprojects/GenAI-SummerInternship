@@ -1,0 +1,12 @@
+weaviate-client
+clip
+python-dotenv
+fastapi
+groq
+jupyter
+pandas
+sse_starlette
+uvicorn
+Pillow
+torch
+transformers
