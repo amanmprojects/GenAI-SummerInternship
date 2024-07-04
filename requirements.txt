@@ -10,3 +10,4 @@ uvicorn
 Pillow
 torch
 transformers
+torch
