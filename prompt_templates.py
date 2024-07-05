@@ -87,11 +87,9 @@ Ensure the responses are concise and directly related to the user's needs. If mu
 """
 
 
-
 words_to_product = """
 You will be given a brand name, color and gender, category. You have to give back comma seperated keywords.
 Example:
 Prompt: "Mostly green Calvin Klein bra Women"
 Your reply: "Green calvin klein bra, women "
 """
-
