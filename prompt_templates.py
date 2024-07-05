@@ -85,7 +85,7 @@ Example Queries and Responses:
 
 Ensure the responses are concise and directly related to the user's needs. If multiple products are relevant, list them in inverse order of priority.
 """
-<<<<<<< HEAD
+
 
 
 words_to_product = """
@@ -94,5 +94,4 @@ Example:
 Prompt: "Mostly green Calvin Klein bra Women"
 Your reply: "Green calvin klein bra, women "
 """
-=======
->>>>>>> bbdc8705531fed4ac350738171196d869e7b1521
+
