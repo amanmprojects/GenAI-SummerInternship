@@ -39,7 +39,7 @@ class QueryRequest(BaseModel):
 
 import os
 from fastapi import UploadFile
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_API_KEY = "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"
 if GROQ_API_KEY is None:
     print("No GROQ_API_KEY found in environment variables")
     exit(1)
@@ -47,7 +47,7 @@ if GROQ_API_KEY is None:
 
 
 groqHandler = search.groqHandler(api_key=GROQ_API_KEY, template=prompt_templates.words_to_product)
-wqs = search.WeaviateQueryService(collection="CleanedProducts", groqHandler=groqHandler, target_vector="name_master_sub_col")
+wqs = search.WeaviateQueryService(collection="CleanedProducts", groqHandler=groqHandler, target_vector="name")
 image_search = search.ImageSearch(wqs = wqs)
 
 @app.get("/")

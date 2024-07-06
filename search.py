@@ -13,7 +13,7 @@ import io
 
 
 class groqHandler:
-    def __init__(self, api_key:(str), template:str = prompt_templates.message_to_product5):
+    def __init__(self, api_key:str, template:str = prompt_templates.message_to_product5):
         self.api_key = api_key
         try:
             self.groq_client = Groq(api_key=self.api_key)
@@ -58,7 +58,7 @@ class groqHandler:
 
 
 
-class WeaviateQueryService:
+class WeaviateQueryService: #Databse se related sab kuch
     def __init__(self, collection:str = "CleanedProducts", groqHandler : groqHandler = None, target_vector:str = None):
 
         try:
@@ -82,7 +82,7 @@ class WeaviateQueryService:
             self.target_vector = "name_master_sub_art_col_use_seas_gender"
 
         
-
+#  text to poroduct (find)
     def get_results(self, query: str, limit: int = 30, groq_llama_simplfy : bool = True, print_responses_name: bool = False) -> List[Dict[str, Any]]:
         
         if groq_llama_simplfy and self.groqHandler:
@@ -94,7 +94,7 @@ class WeaviateQueryService:
             # concepts=modified_query.split(','),
             query=modified_query,
             limit=limit,
-            # distance=0.7,
+            distance=0.5,
             return_metadata=MetadataQuery(distance=True),
             target_vector=self.target_vector
         )
