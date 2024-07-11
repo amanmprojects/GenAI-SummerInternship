@@ -39,15 +39,15 @@ class QueryRequest(BaseModel):
 
 import os
 from fastapi import UploadFile
-GROQ_API_KEY = "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"
+GROQ_API_KEY=os.getenv("GROQ_API_KEY")
 if GROQ_API_KEY is None:
     print("No GROQ_API_KEY found in environment variables")
     exit(1)
 
 
 
-groqHandler = search.groqHandler(api_key=GROQ_API_KEY, template=prompt_templates.words_to_product)
-wqs = search.WeaviateQueryService(collection="CleanedProducts", groqHandler=groqHandler, target_vector="name")
+groqHandler = search.groqHandler(api_key=GROQ_API_KEY, template=prompt_templates.words_to_product6)
+wqs = search.WeaviateQueryService(collection="CleanedProducts", groqHandler=groqHandler, target_vector="name_master_sub_art_col_use_seas_gender")
 image_search = search.ImageSearch(wqs = wqs)
 
 @app.get("/")
@@ -57,7 +57,7 @@ async def read_root():
 
 
 @app.post("/text_search")
-async def search_item(query: QueryRequest, top_n: int = 10, groq_simplify: bool = True):
+async def search_item(query: QueryRequest):
 
     if not query.query:
         return JSONResponse(status_code=400, content=jsonable_encoder({"error": "Query not found"}))
@@ -65,11 +65,6 @@ async def search_item(query: QueryRequest, top_n: int = 10, groq_simplify: bool 
     limit = query.top_n
     groq_simplify = query.groq
     query = query.query
-    # if not groq_simplify:
-    #     if len(query) < 40: 
-    #         groq_simplify = False
-    #     else:
-    #         groq_simplify = True
 
 
     print(f" \n\n\n Got query : {query}\n\n\n")

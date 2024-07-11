@@ -13,7 +13,7 @@ import io
 
 
 class groqHandler:
-    def __init__(self, api_key:str, template:str = prompt_templates.message_to_product5):
+    def __init__(self, api_key:str, template:str = prompt_templates.message_to_product6):
         self.api_key = api_key
         try:
             self.groq_client = Groq(api_key=self.api_key)
@@ -49,7 +49,7 @@ class groqHandler:
                     "content": chat_completion.choices[0].message.content
                 }
             )
-            print(chat_completion.choices[0].message.content)
+            # print(chat_completion.choices[0].message.content)
             return chat_completion.choices[0].message.content
 
 
@@ -81,6 +81,7 @@ class WeaviateQueryService: #Databse se related sab kuch
         else:
             self.target_vector = "name_master_sub_art_col_use_seas_gender"
 
+
         
 #  text to poroduct (find)
     def get_results(self, query: str, limit: int = 30, groq_llama_simplfy : bool = True, print_responses_name: bool = False) -> List[Dict[str, Any]]:
@@ -89,15 +90,21 @@ class WeaviateQueryService: #Databse se related sab kuch
             modified_query = self.groqHandler.query_to_products(query)
         else: 
             modified_query = query
-
+        print(modified_query, type(modified_query))
         results = self.collection.query.near_text(
             # concepts=modified_query.split(','),
             query=modified_query,
             limit=limit,
-            distance=0.5,
             return_metadata=MetadataQuery(distance=True),
             target_vector=self.target_vector
         )
+
+        # results = self.collection.query.near_text(
+        #     query=modified_query,
+        #     limit=limit,
+        #     return_metadata=MetadataQuery(distance=True),
+        #     target_vector=self.target_vector
+        # )
 
 
         list_of_results = list()
